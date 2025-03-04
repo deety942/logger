@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Work Log</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: monospace;
+            margin: 20px;
+        }
+
+        .container {
+            width: 600px;
+            margin: 0 auto;
+            border: 1px solid #00FF00;
+            padding: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="date"] {
+            width: calc(100% - 12px);
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            box-sizing: border-box;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #006400;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            cursor: pointer;
+        }
+
+        #log {
+            margin-top: 20px;
+            border-top: 1px solid #00FF00;
+            padding-top: 10px;
+            white-space: pre-line;
+        }
+
+        #downloadButton {
+            margin-top: 10px;
+        }
+
+        #searchBar {
+            width: calc(100% - 12px);
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: black;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Despatch Load Log</h2>
+
+    <label for="trailerNumber">Trailer Number:</label>
+    <input type="text" id="trailerNumber" name="trailerNumber">
+
+    <label for="loaderId">Loader ID:</label>
+    <input type="text" id="loaderId" name="loaderId">
+
+    <label for="loadName">Load Name:</label>
+    <input type="text" id="loadName" name="loadName">
+
+    <label for="logDate">Date:</label>
+    <input type="date" id="logDate" name="logDate">
+
+    <button onclick="logEntry()">Log Entry</button>
+
+    <input type="text" id="searchBar" placeholder="Search Logs">
+    <div id="log"></div>
+
+    <button id="downloadButton" onclick="downloadLog()">Download Log</button>
+</div>
+
+<script>
+    function logEntry() {
+        var trailerNumber = document.getElementById("trailerNumber").value;
+        var loaderId = document.getElementById("loaderId").value;
+        var loadName = document.getElementById("loadName").value;
+        var logDate = document.getElementById("logDate").value;
+
+        var now = new Date();
+        var timeStamp = now.toLocaleTimeString();
+
+        var entry = `Date: ${logDate}, Time: ${timeStamp}\nTrailer: ${trailerNumber}, Loader: ${loaderId}, Load: ${loadName}\n\n`;
+
+        var log = document.getElementById("log");
+        log.innerHTML += entry;
+
+        document.getElementById("trailerNumber").value = "";
+        document.getElementById("loaderId").value = "";
+        document.getElementById("loadName").value = "";
+        document.getElementById("logDate").value = "";
+
+        // Save the updated log to local storage
+        localStorage.setItem("workLog", document.getElementById("log").innerHTML);
+    }
+
+    function downloadLog() {
+        var logContent = document.getElementById("log").innerText;
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(logContent));
+        element.setAttribute('download', 'work_log.txt');
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    document.getElementById("searchBar").addEventListener("input", function() {
+        let searchTerm = this.value.toLowerCase();
+        let logContent = document.getElementById("log").innerText;
+        let logDiv = document.getElementById("log");
+        let originalLog = logDiv.innerText;
+
+        if (searchTerm === "") {
+            logDiv.innerHTML = originalLog;
+        } else {
+            let highlightedLog = originalLog.replace(new RegExp(searchTerm, 'gi'), match => `<span style="background-color: #006400;">${match}</span>`);
+            logDiv.innerHTML = highlightedLog;
+        }
+    });
+
+    // Load the log from local storage when the page loads
+    window.onload = function() {
+        let savedLog = localStorage.getItem("workLog");
+        if (savedLog) {
+            document.getElementById("log").innerHTML = savedLog;
+        }
+    };
+</script>
+
+</body>
+</html>
